@@ -52,8 +52,10 @@ def model_incidence(p, n_months, h=C.H_REAL):
     return 10 ** log_N * -np.diff(S_edges)
 
 
-REAL_BOUNDS = ([0.01, 0.01, 2.0, -8.0], [3.0, 2.0, 7.0, -1.0])
-REAL_STARTS = [(b, g) for b in (0.3, 0.5, 0.8) for g in (0.1, 0.2)]
+# (beta, gamma, log10 N_eff, log10 I0); gamma bounds come from the infectious-period range
+REAL_BOUNDS = ([0.01, 1 / C.INFECTIOUS_DAYS_RANGE[1], 2.0, -8.0],
+               [3.0, 1 / C.INFECTIOUS_DAYS_RANGE[0], 7.0, -1.0])
+REAL_STARTS = [(b, g) for b in (0.1, 0.3, 0.6) for g in (0.03, 0.1)]
 
 
 def fit_real(cases, starts=REAL_STARTS):

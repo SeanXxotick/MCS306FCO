@@ -58,5 +58,10 @@ SEASONS = [1998, 2001, 2005, 2006, 2008, 2010]  # years with a clear outbreak pe
 SEASON_FIRST_MONTH = 5   # May ... December: the Philippine rainy-season dengue wave
 DAYS_PER_MONTH = 30.4
 H_REAL = 0.5             # RK4 step size for the real-data model [days]
+# Effective infectious period 1/gamma constrained to 7-60 days. Without it the 4-parameter fit can
+# collapse to a degenerate solution (gamma at its bound, R0 ~ 1, huge N_eff) that reproduces 8
+# monthly points equally well. The range covers the human infectious period (~1 week) plus the
+# mosquito stage that a plain SIR model absorbs into gamma.
+INFECTIOUS_DAYS_RANGE = (7, 60)
 BOOTSTRAP_B = 50         # residual-bootstrap replicates for confidence intervals (2010 season)
 REAL_PINN_EPOCHS = 20000
