@@ -6,20 +6,20 @@ The rubric asks for "version history showing collaborative work". Each member ma
 - No two members edit the same file, so nobody gets a merge conflict.
 - All the new tests have been checked and pass.
 
-| Member | Owns | Presents in video |
-|---|---|---|
-| Member 1 | SIR model and RK4 (`src/sir.py`) | Problem and the SIR model |
-| Member 2 | Classical fitting (`src/classical.py`) | RK4 and the step-size study |
-| Member 3 | PINN (`src/pinn.py`) | How the PINN works |
-| Member 4 | Data and experiments (`data/`, `experiments/`) | Results |
-| Member 5 | Paper and presentation (`paper/`, `presentation/`) | Limitations and conclusion |
+| Member | Owns | Presents in video | Status |
+|---|---|---|---|
+| Member 1 (KyHornales) | SIR model and RK4 (`src/sir.py`) | Problem and the SIR model | ✅ Done |
+| Member 2 | Classical fitting (`src/classical.py`) | RK4 and the step-size study | ⬜ To do |
+| Member 3 | PINN (`src/pinn.py`) | How the PINN works | ⬜ To do |
+| Member 4 | Data and experiments (`data/`, `experiments/`) | Results | ⬜ To do |
+| Member 5 | Paper and presentation (`paper/`, `presentation/`) | Limitations and conclusion | ⬜ To do |
 
 ---
 
 ## Step 0: one-time setup (everyone)
 
 1. Accept the GitHub collaborator invite (check your email or <https://github.com/notifications>).
-2. In a terminal:
+2. **Clone the repo; don't `git init` a new folder.** A new folder has no shared history with ours, so your commit can't be merged. Work directly on `main`; there's no need to create a branch. In a terminal:
 
 ```bash
 git clone https://github.com/SeanXxotick/MCS306FCO.git C:\dengue_pinn
@@ -52,7 +52,7 @@ If `git push` is rejected because someone pushed first, run `git pull`, then `gi
 
 ---
 
-## Member 1: RK4 explanation + conservation test
+## ~~Member 1: RK4 explanation + conservation test~~ ✅ Done (KyHornales)
 
 **Edit 1.** In `src/sir.py`, inside the `rk4` docstring, find this line:
 
