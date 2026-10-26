@@ -24,6 +24,8 @@ def rk4(beta, gamma, y0, t_end, h):
 
     One RK4 step:  y_{k+1} = y_k + h/6 (k1 + 2 k2 + 2 k3 + k4)
     Local error is O(h^5), so the global error at t_end is O(h^4).
+    The weights 1, 2, 2, 1 (divided by 6) are Simpson's rule applied to the slope:
+    the start and end slopes count once, the two midpoint slopes count twice.
 
     Returns the time grid t (n+1,) and the solution Y (n+1, 3).
     """
