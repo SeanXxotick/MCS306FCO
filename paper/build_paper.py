@@ -18,7 +18,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from src import config as C  # noqa: E402
 
-AUTHORS = ["[Member 1]", "[Member 2]", "[Member 3]", "[Member 4]", "[Member 5]"]
+AUTHORS = ["Almoguez, Romar S.", "Dela Cruz, Sean Arkin C.", "Fajardo, Osyris Benedict P.",
+           "Hornales, Jian Kyle C."]
 AFFILIATION = ("Bachelor of Science in Mathematics major in Computer Science\n"
                "College of Science, Bulacan State University, Malolos, Bulacan, Philippines")
 COURSE = "MCS 306 Final Course Output"

@@ -12,7 +12,7 @@ The rubric asks for "version history showing collaborative work". Each member ma
 | Member 2 | Classical fitting (`src/classical.py`) | RK4 and the step-size study | ⬜ To do |
 | Member 3 | PINN (`src/pinn.py`) | How the PINN works | ⬜ To do |
 | Member 4 | Data and experiments (`data/`, `experiments/`) | Results | ⬜ To do |
-| Member 5 | Paper and presentation (`paper/`, `presentation/`) | Limitations and conclusion | ⬜ To do |
+| Member 5 (SeanXxotick) | Paper and presentation (`paper/`, `presentation/`) | Limitations and conclusion | ✅ Done |
 
 ---
 
