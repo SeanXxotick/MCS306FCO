@@ -1,0 +1,11 @@
+# environment
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# raw download is 55 MB; it is re-downloaded automatically (see README)
+data/raw/
+
+# Word lock files
+~$*.docx
