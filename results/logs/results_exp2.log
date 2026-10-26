@@ -1,0 +1,36 @@
+
+=== Experiment 2: Synthetic recovery: PINN vs classical ===
+  PINN, noise 0% ...
+    epoch   2000  loss=5.144e-04  beta=0.3221  gamma=0.1032
+    epoch   4000  loss=7.540e-05  beta=0.2968  gamma=0.1003
+    epoch   6000  loss=2.712e-05  beta=0.2981  gamma=0.1001
+    epoch   8000  loss=1.222e-05  beta=0.2987  gamma=0.1001
+    epoch  10000  loss=8.240e-06  beta=0.2991  gamma=0.1000
+    epoch  12000  loss=4.310e-06  beta=0.2993  gamma=0.1000
+  PINN, noise 5% ...
+    epoch   2000  loss=7.108e-04  beta=0.3239  gamma=0.1027
+    epoch   4000  loss=3.257e-04  beta=0.2979  gamma=0.0996
+    epoch   6000  loss=2.857e-04  beta=0.2991  gamma=0.0994
+    epoch   8000  loss=2.771e-04  beta=0.2998  gamma=0.0994
+    epoch  10000  loss=2.747e-04  beta=0.3000  gamma=0.0994
+  PINN, noise 10% ...
+    epoch   2000  loss=1.322e-03  beta=0.3285  gamma=0.1018
+    epoch   4000  loss=1.026e-03  beta=0.2998  gamma=0.0988
+    epoch   6000  loss=1.009e-03  beta=0.3000  gamma=0.0988
+    epoch   8000  loss=1.008e-03  beta=0.3001  gamma=0.0987
+Experiment 2: synthetic recovery
+                         method  noise   beta  beta_err_pct  beta_err_sd   gamma  gamma_err_pct  gamma_err_sd  traj_rmse  seconds  iterations
+Classical (RK4 + least squares)      0    0.3     3.701e-14          NaN     0.1      1.388e-14           NaN  1.387e-16   0.5479           6
+Classical (RK4 + least squares)   0.05 0.2998         0.266       0.1559     0.1          0.402        0.1941  0.0009967   0.4587         6.4
+Classical (RK4 + least squares)    0.1 0.2995         0.532       0.3088     0.1         0.8066        0.3886   0.001994   0.5132         6.8
+                           PINN      0 0.2994        0.2129          NaN     0.1        0.03096           NaN  0.0005588    72.91     1.3e+04
+                           PINN   0.05    0.3      0.002786          NaN 0.09937         0.6313           NaN    0.00103    58.38    1.05e+04
+                           PINN    0.1 0.3002       0.05716          NaN 0.09875          1.254           NaN   0.002113    48.49        8500
+
+Run started 2026-10-26 17:21:51
+Python 3.14.6 on Windows-11-10.0.26200-SP0
+CPU: Intel64 Family 6 Model 186 Stepping 2, GenuineIntel
+numpy 2.5.4, scipy 1.18.1, pandas 3.1.0, matplotlib 3.11.2, torch 2.14.1+cpu
+torch threads: 1, seed: 0
+
+Experiment 2 (Synthetic recovery: PINN vs classical): 190.5 s

@@ -1,0 +1,20 @@
+
+=== Experiment 3: PINN physics-loss weight sweep ===
+  PINN, w_ode = 1.0 ...
+  PINN, w_ode = 0.1 ...
+  PINN, w_ode = 0.01 ...
+  PINN, w_ode = 0.001 ...
+Experiment 3: w_ode sweep
+ w_ode   beta   gamma  beta_err_pct  gamma_err_pct  final_data_loss  final_ode_loss  epochs  converged_by_tol  seconds
+     1 0.2874  0.0989         4.189          1.097        0.0006349       0.0003729   20000             False    112.8
+   0.1 0.2972 0.09929        0.9359         0.7074        0.0002909       0.0001561   11500              True    65.51
+  0.01    0.3 0.09937      0.002786         0.6313        0.0002578         0.00155   10500              True    56.39
+ 0.001 0.3049 0.09947         1.628         0.5279        0.0002113         0.01993   12000              True    55.63
+
+Run started 2026-10-26 17:21:51
+Python 3.14.6 on Windows-11-10.0.26200-SP0
+CPU: Intel64 Family 6 Model 186 Stepping 2, GenuineIntel
+numpy 2.5.4, scipy 1.18.1, pandas 3.1.0, matplotlib 3.11.2, torch 2.14.1+cpu
+torch threads: 1, seed: 0
+
+Experiment 3 (PINN physics-loss weight sweep): 294.2 s

@@ -1,0 +1,12 @@
+Run started 2026-10-26 17:21:51
+Python 3.14.6 on Windows-11-10.0.26200-SP0
+CPU: Intel64 Family 6 Model 186 Stepping 2, GenuineIntel
+numpy 2.5.4, scipy 1.18.1, pandas 3.1.0, matplotlib 3.11.2, torch 2.14.1+cpu
+torch threads: 1, seed: 0
+
+Experiments were run as parallel processes (one CPU thread each) on the machine above:
+Experiment 1 (RK4 step size / convergence): 4.9 s
+Experiment 2 (Synthetic recovery: PINN vs classical): 190.5 s
+Experiment 3 (PINN physics-loss weight sweep): 294.2 s
+Experiment 4 (Real data: Bulacan outbreak seasons): 133.3 s
+Full console output: results/logs/
