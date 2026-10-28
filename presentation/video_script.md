@@ -1,6 +1,6 @@
 # Video Script (target: 8–10 minutes)
 
-The audience is general, so avoid jargon or explain it right away. Each member presents the part they own (see `docs/TEAM_WORKFLOW.md`). Slides are listed as **[SLIDE]**, and figures come from `results/figures/`.
+The audience is general, so avoid jargon or explain it right away. Each member presents the part labelled with their role below. Slides are listed as **[SLIDE]**, and figures come from `results/figures/`.
 
 ---
 
