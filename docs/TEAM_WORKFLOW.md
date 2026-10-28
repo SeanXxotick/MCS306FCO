@@ -11,7 +11,7 @@ The rubric asks for "version history showing collaborative work". Each member ma
 | Member 1 (KyHornales) | SIR model and RK4 (`src/sir.py`) | Problem and the SIR model | ✅ Done |
 | Member 2 | Classical fitting (`src/classical.py`) | RK4 and the step-size study | ⬜ To do |
 | Member 3 | PINN (`src/pinn.py`) | How the PINN works | ⬜ To do |
-| Member 4 | Data and experiments (`data/`, `experiments/`) | Results | ⬜ To do |
+| Member 4 (Ralmoguez) | Data and experiments (`data/`, `experiments/`) | Results | ✅ Done |
 | Member 5 (OhsirIIII) | Paper and presentation (`paper/`, `presentation/`) | Limitations and conclusion | ✅ Names + LaTeX paper done · ⬜ slides |
 
 ---
@@ -197,7 +197,7 @@ git commit -m "Comment PINN parameterization and add prediction test"
 
 ---
 
-## Member 4: data documentation + results summary
+## ~~Member 4: data documentation + results summary~~ ✅ Done (Ralmoguez)
 
 **Edit 1.** Create a new file `data/README.md`:
 
