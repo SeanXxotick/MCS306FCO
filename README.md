@@ -64,6 +64,19 @@ Experiment 4 uses `data/processed/bulacan_monthly_1994_2010.csv`. If you delete 
 
 No personal or hospital data are used.
 
+
+## Key results
+
+| Experiment | Finding |
+|---|---|
+| 1. RK4 step size | Observed order of accuracy 3.98–4.01 (theory: 4) |
+| 2. Synthetic recovery | Both methods recover β, γ within ~1.3% at 10% noise; the PINN is ~118× slower |
+| 3. PINN loss weight | With w_ode = 1 the PINN stalls and hits the 20,000-epoch cap |
+| 4. Bulacan 1998–2010 | Classical SIR fits 6 seasons (R² 0.90–0.998, R0 1.29–3.43); the PINN on 2010 is not self-consistent |
+
+Full numbers: `results/tables/`; figures: `results/figures/`.
+
+
 ## Main limitations
 
 - A plain SIR model ignores the mosquito vector, under-reporting and seasonality. The real-data rates should therefore be read as *effective* rates, not biological constants.
