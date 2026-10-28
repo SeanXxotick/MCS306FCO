@@ -15,7 +15,13 @@ from .sir import rk4
 
 # ---------------------------------------------------------------- synthetic data: observe I(t)
 def fit_synthetic(t_obs, I_obs, y0, h=C.H_FIT, p0=(C.PINN["beta0"], C.PINN["gamma0"])):
-    """Estimate (beta, gamma) from daily observations of I(t)."""
+    """Estimate (beta, gamma) from daily observations of I(t).
+
+    least_squares uses a trust-region method: around the current guess it builds a local
+    linear model of the residuals and takes the best step that stays inside a "trust
+    region"; the region grows when steps work and shrinks when they don't.
+    nfev = number of residual evaluations, i.e. full RK4 simulations.
+    """
     t_end = float(t_obs[-1])
     stride = int(round((t_obs[1] - t_obs[0]) / h))
     if stride < 1 or not np.isclose(stride * h, t_obs[1] - t_obs[0]):
