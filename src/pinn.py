@@ -38,6 +38,7 @@ class SIRNet(nn.Module):
         self.body = nn.Sequential(*layers)
 
     def forward(self, tau):
+        # sigmoid squashes the outputs into (0, 1): S, R and the scaled I are all fractions
         return torch.sigmoid(self.body(tau))
 
 
@@ -77,6 +78,7 @@ def train_pinn(t_obs, I_obs, y0, w_ode=None, seed=C.SEED, settings=None, verbose
     T = float(t_obs[-1])
     s_I = float(np.max(I_obs))  # scale so the network's I output is O(1)
     net = SIRNet(p["width"], p["depth"])
+    # store log(beta), log(gamma): exp() of any number is positive, so the rates stay > 0
     log_beta = nn.Parameter(torch.tensor(np.log(p["beta0"])))
     log_gamma = nn.Parameter(torch.tensor(np.log(p["gamma0"])))
     opt = torch.optim.Adam(list(net.parameters()) + [log_beta, log_gamma], lr=p["lr"])
