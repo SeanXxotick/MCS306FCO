@@ -9,8 +9,8 @@ The rubric asks for "version history showing collaborative work". Each member ma
 | Member | Owns | Presents in video | Status |
 |---|---|---|---|
 | Member 1 (KyHornales) | SIR model and RK4 (`src/sir.py`) | Problem and the SIR model | ✅ Done |
-| Member 2 | Classical fitting (`src/classical.py`) | RK4 and the step-size study | ⬜ To do |
-| Member 3 | PINN (`src/pinn.py`) | How the PINN works | ⬜ To do |
+| Member 2 (SeanXxotick) | Classical fitting (`src/classical.py`) | RK4 and the step-size study | ✅ Done |
+| Member 3 (SeanXxotick) | PINN (`src/pinn.py`) | How the PINN works | ✅ Done |
 | Member 4 (Ralmoguez) | Data and experiments (`data/`, `experiments/`) | Results | ✅ Done |
 | Member 5 (OhsirIIII) | Paper and presentation (`paper/`, `presentation/`) | Limitations and conclusion | ✅ Names + LaTeX paper done · ⬜ slides |
 
@@ -93,7 +93,7 @@ git commit -m "Explain RK4 weights and test that R is non-decreasing"
 
 ---
 
-## Member 2: least-squares explanation + noisy-fit test
+## ~~Member 2: least-squares explanation + noisy-fit test~~ ✅ Done (SeanXxotick)
 
 **Edit 1.** In `src/classical.py`, replace the one-line docstring of `fit_synthetic`:
 
@@ -142,7 +142,7 @@ git commit -m "Document least-squares solver and add noisy-fit test"
 
 ---
 
-## Member 3: PINN comments + prediction test
+## ~~Member 3: PINN comments + prediction test~~ ✅ Done (SeanXxotick)
 
 **Edit 1.** In `src/pinn.py`, in the `SIRNet` class, change:
 
