@@ -50,7 +50,7 @@ This script matches the slide deck [`PINN_Dengue_Bulacan_Slides.pptx`](PINN_Deng
 
 **[SLIDE 10: What we learned]**
 
-> To wrap up: for a small model and sparse data, the classical method is faster, simpler and more reliable. PINNs work, but they need more data and careful tuning. We also found that the data pin down R-naught much better than the recovery rate gamma, whose interval covers the whole range we allowed. Our study has limits. SIR ignores mosquitoes, so our infectious period of three to six weeks absorbs the mosquito's part of the cycle. Our data are monthly and end in 2010, and the 2006 fit hit a bound. For our thesis, we plan a mosquito–human model with weekly data and rainfall-driven transmission, where a neural network could really earn its place.
+> To wrap up: for a small model and sparse data, the classical method is faster, simpler and more reliable. PINNs work, but they need more data and careful tuning. We also found that the data pin down R-naught much better than the recovery rate gamma, whose interval covers the whole range we allowed. Our study has limits. SIR ignores mosquitoes, so our infectious period of three to six weeks absorbs the mosquito's part of the cycle. Our data are monthly and end in 2010, and the 2006 fit hit a bound. We recommend a mosquito–human model with weekly data and rainfall-driven transmission, where a neural network could really earn its place.
 
 **[SLIDE 11: Thank you + repo link]**
 
