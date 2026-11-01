@@ -10,6 +10,7 @@ Usage (from the project root, next to build_paper.py):
 
 Figures are taken from C.FIGURES (the same PNGs build_paper.py embeds); the \\graphicspath in
 the output points there, with a local figures/ folder as fallback (handy for Overleaf).
+The title-page logos are in paper/logos/ (upload that folder to Overleaf too).
 """
 import inspect
 import math
@@ -235,7 +236,7 @@ TOKENS = {
                      + "".join(f"  \\textit{{{esc(a)}}}\\\\\n" for a in AFFILIATION[:-1])
                      + f"  \\textit{{{esc(AFFILIATION[-1])}}}\\\\[6pt]\n"
                      + f"  {esc(COURSE)}\\\\\n  Code and data: \\url{{{REPO_URL}}}"),
-    "GRAPHICSPATH": "{" + figdir + "}{figures/}",
+    "GRAPHICSPATH": "{" + figdir + "}{figures/}{logos/}",
     "REPO": REPO_URL,
     "ord_mean": f(orders.mean()), "omin": f(orders.min(), 3), "omax": f(orders.max(), 3),
     "p10_b": pct(pinn.loc[0.10, "beta_err_pct"]), "p10_g": pct(pinn.loc[0.10, "gamma_err_pct"]),
@@ -319,7 +320,11 @@ TEMPLATE = r'''\documentclass[12pt,a4paper]{article}
 \newcommand{\Neff}{N_{\mathrm{eff}}}
 \newcommand{\wode}{w_{\mathrm{ode}}}
 
-\title{\bfseries Physics-Informed Neural Networks versus Classical Least Squares for Estimating Dengue Transmission Parameters: A Case Study of Bulacan, Philippines (1994--2010)}
+% title flanked by the BulSU (left) and College of Science (right) logos from paper/logos/
+\title{\makebox[\textwidth]{%
+  \raisebox{-0.5\height}{\includegraphics[height=2.2cm]{bulsu_logo.png}}\hfill
+  \begin{minipage}{0.68\textwidth}\centering\Large\bfseries Physics-Informed Neural Networks versus Classical Least Squares for Estimating Dengue Transmission Parameters: A Case Study of Bulacan, Philippines (1994--2010)\end{minipage}\hfill
+  \raisebox{-0.5\height}{\includegraphics[height=2.2cm]{cs_logo.png}}}}
 \author{%
 <<AUTHOR_BLOCK>>}
 \date{}
@@ -589,6 +594,7 @@ Future work suggested by these findings, and a natural basis for a thesis, inclu
 \end{itemize}
 
 % =====================================================================
+\newpage
 \begin{thebibliography}{99}
 \setlength{\itemsep}{3pt}
 \small
