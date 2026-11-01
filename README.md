@@ -23,7 +23,7 @@ data/processed/          Bulacan monthly cases (small CSV, committed)
 results/tables/          CSV outputs used in the paper
 results/figures/         PNG figures used in the paper
 paper/                   build_paper.py -> the Word manuscript
-presentation/            video script and slide outline
+presentation/            slide deck (.pptx) and video script
 docs/                    study guide (explanations for the panel)
 ```
 

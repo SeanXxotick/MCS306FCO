@@ -1,84 +1,60 @@
-# Video Script (target: 8–10 minutes)
+# Video Script (target: about 6 minutes)
 
-The audience is general, so avoid jargon or explain it right away. Each member presents the part labelled with their role below. Slides are listed as **[SLIDE]**, and figures come from `results/figures/`.
+This script matches the slide deck [`PINN_Dengue_Bulacan_Slides.pptx`](PINN_Dengue_Bulacan_Slides.pptx) (11 slides). The same narration is in each slide's speaker notes. The audience is general, so avoid jargon or explain it right away. Figures come from `results/figures/`.
 
 ---
 
-## Part 1: The problem (Member 1, ~1.5 min)
+## Part 1: The problem (Jian Kyle C. Hornales, ~1.5 min)
 
-**[SLIDE 1: Title]** *Physics-Informed Neural Networks versus Classical Least Squares for Estimating Dengue Transmission Parameters: Bulacan, 1994–2010*, with group names and BulSU.
+**[SLIDE 1: Title]**
 
-> Every rainy season, dengue cases in Bulacan climb, and sometimes they explode. In August and September of 2010, more than a thousand cases were reported *each month* in our province.
+> Hello! We are Romar Almoguez, Sean Arkin Dela Cruz, Osyris Fajardo and Jian Kyle Hornales, BS Mathematics students from the College of Science of Bulacan State University. Our project compares an AI method, physics-informed neural networks, with classical least squares for estimating how dengue spreads in Bulacan.
 
-**[SLIDE 2: fig5_bulacan_overview.png]**
+**[SLIDE 2: Dengue in Bulacan (fig5_bulacan_overview.png)]**
 
-> To respond to an outbreak, health workers want to know two things: how fast is it spreading, and how long do people stay infectious? Mathematicians capture this with the SIR model.
+> Every rainy season, dengue cases in Bulacan climb, and sometimes they explode. This chart shows the monthly reported cases from 1994 to 2010, from the open OpenDengue database. In 2010, more than a thousand cases were reported in August and again in September: 1,216 in September alone. To respond, health workers want to know two things: how fast is dengue spreading, and how long do people stay infectious?
 
-**[SLIDE 3: S → I → R diagram with the three equations]**
+**[SLIDE 3: The SIR model and the inverse problem]**
 
-> We split the population into Susceptible, Infected and Recovered. Beta, β, is how fast infection spreads. Gamma, γ, is how fast people recover. Their ratio, R-naught, tells us how many people one sick person infects. If it's above 1, the outbreak grows.
->
-> The catch is that nobody can measure β and γ directly. We have to work backwards from case counts. That's called an *inverse problem*, and it's what our project is about.
+> Mathematicians answer this with the SIR model. We split the population into Susceptible, Infected and Recovered. Beta is how fast the infection spreads, and gamma is how fast people recover, so one over gamma is how long they stay infectious. Their ratio, R-naught, is how many people one sick person infects; above 1, the outbreak grows. The catch is that nobody can measure beta and gamma directly. We have to work backwards from case counts. That is called an inverse problem, and it is what our project is about.
 
-## Part 2: Solving the equations, RK4 (Member 2, ~1.5 min)
+## Parts 2–3: Solving the model and two estimation methods (Sean Arkin C. Dela Cruz, ~1.5 min)
 
-**[SLIDE 4: RK4 formula, 4 slopes averaged]**
+**[SLIDE 4: RK4 (fig1_rk4_convergence.png)]**
 
-> These equations can't be solved with pen and paper, so we step forward in time using the Runge–Kutta 4 method. At each step it samples the slope four times and takes a weighted average.
+> These equations have no pen-and-paper solution, so we step forward in time with the fourth-order Runge–Kutta method, or RK4. Each step samples the slope four times and takes a weighted average. To check our solver, we halved the step size again and again. Theory says the error should shrink sixteen times with every halving; that is fourth-order accuracy. Our measured order is between 3.98 and 4.01, exactly as predicted. The right panel shows that the step size inside the fitting matters too: a coarse five-day step biases the estimates by about 0.4 percent, so we fit with a step of 0.1 day.
 
-**[SLIDE 5: fig1_rk4_convergence.png]**
+**[SLIDE 5: Two ways to estimate β and γ]**
 
-> How do we know our solver is right? Theory says that if we halve the step size, the error should shrink 16 times. That's "fourth-order" accuracy. We tested it, and our measured order is 3.98 to 4.01, exactly as predicted.
->
-> The right panel shows something practical: the step size used *inside* the fitting procedure matters. Too coarse a step gives biased estimates.
+> We compare two ways to estimate beta and gamma. Method one is classical: guess beta and gamma, simulate with RK4, compare with the data, and let a least-squares algorithm improve the guess. On our test data it finishes in under a second. Method two is the AI approach: a physics-informed neural network, or PINN. A neural network learns the outbreak curve, and beta and gamma are learned at the same time as extra trainable parameters. Its loss has three parts: fit the data, obey the SIR equations, and start from the right initial state. The weight w-ode sets how much the physics counts.
 
-## Part 3: Two ways to estimate β and γ (Member 3, ~2 min)
+## Part 4: Results (Romar S. Almoguez, ~2 min)
 
-**[SLIDE 6: side-by-side diagram: Classical vs PINN]**
+**[SLIDE 6: Synthetic test (fig2_fits.png)]**
 
-> **Method 1, classical.** Guess β and γ, simulate with RK4, compare with the data, adjust, and repeat. The computer uses an algorithm called least squares to find the best guess in just a few dozen tries.
->
-> **Method 2, the AI approach: a Physics-Informed Neural Network, or PINN.** A neural network learns the shape of the outbreak curve. But we don't just ask it to fit the data. We also punish it whenever its curve breaks the SIR equations. β and γ are learned at the same time, as extra knobs inside the network.
+> First, we tested both methods on fake outbreaks where we know the true answer, beta 0.3 and gamma 0.1, with 0, 5 and 10 percent noise. Both methods recover the true values: even at 10 percent noise, every error is below 1.5 percent. But look at the time. The classical method takes about half a second, while the PINN needs thousands of training epochs and about a minute. On average, it is 118 times slower for the same answer.
 
-**[SLIDE 7: loss formula L = L_data + w_ode·L_ode + L_ic]**
+**[SLIDE 7: Tuning the PINN (fig4_ode_weight_sweep.png)]**
 
-> So the network is graded on three things: matching the data, obeying the physics, and starting at the right place. The weight w-ode decides how much the physics counts.
+> The PINN is also sensitive to tuning. We trained it with four values of the physics weight. With w-ode equal to 1, beta barely moved for about 12,000 epochs, and training hit the 20,000-epoch limit still 4 percent off. With 0.01, the best value, beta came out almost exact. Choosing this weight is a real tuning problem that the classical method simply does not have.
 
-## Part 4: Results (Member 4, ~2.5 min)
+**[SLIDE 8: Six Bulacan seasons (fig6_bulacan_seasons.png)]**
 
-**[SLIDE 8: fig2_fits.png]**
+> Then, real data. We fitted the SIR model to six outbreak seasons in Bulacan, from May to December, using monthly case counts. The model follows the curves closely, with R-squared from 0.903 to 0.998, and R-naught between 1.3 and 3.4. One warning: in 2006, the infectious period hit our lower limit of seven days, so we trust that season less.
 
-> First we tested both methods on fake outbreaks where we *know* the true answer: β = 0.3 and γ = 0.1. We added 0, 5 and 10% noise. Both methods recover the true values. At 10% noise the PINN is off by 0.06% for β and 1.3% for γ.
+**[SLIDE 9: The PINN on real data (fig7_bulacan_pinn.png)]**
 
-**[SLIDE 9: table from exp2_summary.csv, highlight Time column]**
+> And the PINN on real data? For 2010, its network curve fits the eight monthly points almost perfectly, with an R-squared of 0.9997. But when we put the beta and gamma it learned back into RK4, we get a different curve, with an R-squared of only 0.647. With only eight data points, the network can bend to fit the data without truly learning the parameters. The classical fit gives R-naught 2.71, with a bootstrap 95 percent interval of 1.29 to 4.24.
 
-> But look at the time. The classical method takes about half a second. The PINN takes about a minute: over 100 times slower for the same answer.
+## Part 5: Limitations and conclusion (Osyris Benedict P. Fajardo, ~1 min)
 
-**[SLIDE 10: fig4_ode_weight_sweep.png]**
+**[SLIDE 10: What we learned]**
 
-> The PINN is also picky. When the physics weight was too high, β got stuck for 12,000 training steps and never fully converged. Choosing this weight is a real tuning problem.
+> To wrap up: for a small model and sparse data, the classical method is faster, simpler and more reliable. PINNs work, but they need more data and careful tuning. We also found that R-naught is estimated more reliably than beta and gamma separately. Our study has limits. SIR ignores mosquitoes, so our infectious period of three to six weeks absorbs the mosquito's part of the cycle. Our data are monthly and end in 2010, and the 2006 fit hit a bound. For our thesis, we plan a mosquito–human model with weekly data and rainfall-driven transmission, where a neural network could really earn its place.
 
-**[SLIDE 11: fig6_bulacan_seasons.png]**
+**[SLIDE 11: Thank you + repo link]**
 
-> Then real data. We fitted six outbreak seasons in Bulacan. The SIR model follows the curves closely, with R-squared from 0.90 to 0.998, and R-naught between about 1.3 and 3.4.
-
-**[SLIDE 12: fig7_bulacan_pinn.png]**
-
-> And the PINN on real data? Its curve fits the eight monthly points almost perfectly. But when we plug the β and γ it learned back into the equations, we get a *different* curve. With only eight data points, the network can bend to fit the data without truly learning the parameters.
-
-## Part 5: Limitations and conclusion (Member 5, ~1.5 min)
-
-**[SLIDE 13: Limitations]**
-
-> Our model is simple. Dengue actually spreads through mosquitoes, which SIR ignores, so our "infectious period" comes out at around three to six weeks instead of one. That's because it absorbs the mosquito's part of the cycle. Our data are monthly and stop in 2010.
-
-**[SLIDE 14: Conclusion]**
-
-> - For a small model and sparse data, the classical method is faster, simpler and just as accurate.
-> - PINNs are powerful, but they need more data and careful tuning.
-> - Next, for our thesis: a mosquito–human model, weekly data, and rainfall-driven transmission, where a neural network could really earn its place.
-
-**[SLIDE 15: Thank you + repo link]** `https://github.com/SeanXxotick/MCS306FCO`
+> Thank you for watching! Our code, data, figures and paper are all on GitHub at github.com/SeanXxotick/MCS306FCO.
 
 ---
 
@@ -86,5 +62,12 @@ The audience is general, so avoid jargon or explain it right away. Each member p
 
 - Screen-record the slides and add each member's voice. A face cam is optional.
 - Show `python run_all.py` running for about 10 seconds to prove the results are reproducible.
-- Keep each part within its time; the total should be at most 10 minutes.
+- Keep each part within its time; the total should be about 6 minutes.
 - Before recording, check the numbers on the slides against `results/tables/`. If you rerun the experiments, the numbers can change slightly.
+
+### Editing the slides in Canva
+
+- In Canva, choose **Create a design → Import file** and upload the `.pptx`. Every text box, shape and figure stays editable.
+- The fonts are Noto Serif (headings) and Noto Sans (text), which Canva also has. Equations are images, so they look the same everywhere.
+- Put the BulSU and College of Science logos over the dashed **LOGO** circles on slides 1 and 11, then delete the circles.
+- If you change a number on a slide, change it in the narration too.
