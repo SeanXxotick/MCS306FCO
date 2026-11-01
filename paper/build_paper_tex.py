@@ -322,9 +322,9 @@ TEMPLATE = r'''\documentclass[12pt,a4paper]{article}
 
 % title flanked by the BulSU (left) and College of Science (right) logos from paper/logos/
 \title{\makebox[\textwidth]{%
-  \raisebox{-0.5\height}{\includegraphics[height=2.2cm]{bulsu_logo.png}}\hfill
-  \begin{minipage}{0.68\textwidth}\centering\Large\bfseries Physics-Informed Neural Networks versus Classical Least Squares for Estimating Dengue Transmission Parameters: A Case Study of Bulacan, Philippines (1994--2010)\end{minipage}\hfill
-  \raisebox{-0.5\height}{\includegraphics[height=2.2cm]{cs_logo.png}}}}
+  \raisebox{-0.5\height}{\includegraphics[height=3.1cm]{bulsu_logo.png}}\hfill
+  \begin{minipage}{0.60\textwidth}\centering\Large\bfseries Physics-Informed Neural Networks versus Classical Least Squares for Estimating Dengue Transmission Parameters: A Case Study of Bulacan, Philippines (1994--2010)\end{minipage}\hfill
+  \raisebox{-0.5\height}{\includegraphics[height=3.1cm]{cs_logo.png}}}}
 \author{%
 <<AUTHOR_BLOCK>>}
 \date{}
