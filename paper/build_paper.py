@@ -216,9 +216,6 @@ body(
     "low-dimensional ODE models with sparse data, classical fitting remains the more reliable and "
     "economical tool, while PINNs need richer data or additional constraints to be reliable."
 )
-rich([("Keywords: ", "b"), ("dengue, SIR model, physics-informed neural networks, Runge–Kutta, "
-                            "parameter estimation, inverse problems, Bulacan", "i")])
-
 # ================================================================== 1 INTRODUCTION
 doc.add_heading("1. Introduction", 1)
 body(
