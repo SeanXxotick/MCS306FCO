@@ -565,7 +565,7 @@ t4 = table(seasons[["season", "total_cases", "peak_cases", "beta", "gamma", "R0"
            note=(f"1/γ̂ was constrained to {lo_days}–{hi_days} days; "
                  + (f"the {', '.join(str(s) for s in at_bound.season)} estimate lies on the boundary."
                     if len(at_bound) else "all estimates lie inside the constraint.")),
-           fmts={"total_cases": lambda v: f"{int(v):,}", "peak_cases": lambda v: f"{int(v):,}",
+           fmts={"season": lambda v: f"{int(v)}", "total_cases": lambda v: f"{int(v):,}", "peak_cases": lambda v: f"{int(v):,}",
                  "beta": lambda v: f"{v:.3f}", "gamma": lambda v: f"{v:.3f}", "R0": lambda v: f"{v:.2f}",
                  "infectious_days": lambda v: f"{v:.1f}", "N_eff": lambda v: f"{v:,.0f}",
                  "R2": lambda v: f"{v:.3f}"})
