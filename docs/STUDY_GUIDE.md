@@ -73,8 +73,8 @@ The synthetic data were *generated* with RK4 at h = 0.1, so fitting with the sam
 
 - `scipy.optimize.least_squares` uses a **trust-region reflective** algorithm, a Newton-like method that respects bounds (β, γ > 0).
 - It needs a residual vector and estimates the Jacobian by finite differences.
-- Each "function evaluation" (`nfev`) is one full RK4 simulation.
-- **Tolerance:** `ftol`, `xtol` and `gtol` (all 1e-10) stop the iteration when the cost, the parameters or the gradient stop changing.
+- Each "function evaluation" (`nfev`) is one full RK4 simulation. SciPy does not count the extra simulations it uses to estimate the Jacobian (one per parameter per iteration), so the real number of RK4 runs is about three times `nfev` (18–21 for the synthetic fits).
+- **Tolerance:** `ftol`, `xtol` and `gtol` stop the iteration when the cost, the parameters or the gradient stop changing. The synthetic fits use 1e-10; the real-data fits and the bootstrap keep SciPy's default of 1e-8.
 
 **Real data (Experiment 4).** The data are *monthly new cases*, not I(t). The model predicts
 
@@ -106,13 +106,13 @@ L = L_data + w_ode · L_ode + L_ic
 - **L_ic:** the network must start at the known initial state.
 - **β and γ** are `nn.Parameter`s stored as log-values, so exp(·) keeps them positive. The optimiser updates them together with the weights; they are the only values in the network that "mean" something.
 
-**Scaling.** I is small (≈ 0.01–0.3), so the network outputs I/s_I, where s_I is the maximum observed I. All outputs are then O(1), which helps training.
+**Scaling.** I is small (≈ 0.01–0.3), so the network outputs I/s_I, where s_I is the maximum observed I (the real-data PINN fixes s_I = 0.2 and weights the initial-condition loss by 100, because I₀ is tiny). All outputs are then O(1), which helps training.
 
 **Optimiser: Adam, learning rate 1e-3.** The learning rate is the PINN's "step size". Each epoch is one gradient step.
 
 **Stopping rule (tolerance).** Every 500 epochs we compare β and γ with their values 500 epochs earlier. We stop when both relative changes are below `tol` = 1e-4, otherwise at 20,000 epochs. The reported `iterations` is the stopping epoch.
 
-**Physics-loss weight w_ode (Experiment 3).** With w_ode = 1 the physics term dominates early. The network finds a smooth curve that satisfies the ODE for the *wrong* β and γ and barely fits the data. Smaller weights let the data steer the parameters. This sensitivity is a known PINN difficulty (Wang et al., 2021) and the main practical drawback compared with least squares.
+**Physics-loss weight w_ode (Experiment 3).** With w_ode = 1 the physics term dominates early. The network finds a smooth curve that satisfies the ODE for the *wrong* β and γ and fits the data less closely. Smaller weights let the data steer the parameters. This sensitivity is a known PINN difficulty (Wang et al., 2021) and the main practical drawback compared with least squares.
 
 **Panel question: "If the classical method is faster and as accurate, why use a PINN?"**
 - PINNs shine when the model is a PDE, when data are scattered or partial, when some compartments are unobserved, or when no fast solver exists.
@@ -125,8 +125,8 @@ L = L_data + w_ode · L_ode + L_ic
 
 | Experiment | Figure / table | What to say |
 |---|---|---|
-| 1 | fig1, exp1_*.csv | RK4 is 4th-order as theory predicts; the solver step inside a fit controls bias |
-| 2 | fig2, fig3, exp2_summary.csv | Both methods recover β, γ within a few % even at 10% noise; classical is ~100× faster |
+| 1 | fig1, exp1_*.csv | RK4 is 4th-order as theory predicts; the solver step inside a fit controls bias (at 2- and 5-day steps partly through the linear interpolation between steps) |
+| 2 | fig2, fig3, exp2_summary.csv | Both methods recover β, γ within a few % even at 10% noise; classical is ~118× faster |
 | 3 | fig4, exp3_ode_weight_sweep.csv | PINN accuracy depends strongly on w_ode, which is a stability/tuning issue |
 | 4 | fig5–7, exp4_*.csv | Real seasons fit well with classical SIR (R0 values, wide bootstrap intervals); the PINN on 8 monthly points is not self-consistent |
 

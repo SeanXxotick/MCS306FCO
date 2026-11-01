@@ -65,3 +65,5 @@ H_REAL = 0.5             # RK4 step size for the real-data model [days]
 INFECTIOUS_DAYS_RANGE = (7, 60)
 BOOTSTRAP_B = 50         # residual-bootstrap replicates for confidence intervals (2010 season)
 REAL_PINN_EPOCHS = 20000
+REAL_PINN_IC_WEIGHT = 100  # I0 is tiny, so the initial condition must be enforced hard
+REAL_PINN_S_I = 0.2        # scale of I in the network output (I stays below ~20% of N_eff)

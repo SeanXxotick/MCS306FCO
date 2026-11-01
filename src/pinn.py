@@ -143,7 +143,7 @@ def train_pinn_incidence(cases, month_edges, log_N, log_I0, w_ode=None, epochs=C
     torch.manual_seed(seed)
     T = float(month_edges[-1])
     N_eff, I0 = 10 ** log_N, 10 ** log_I0
-    s_I = 0.2  # I stays below ~20% of the effective population in the fitted model
+    s_I = C.REAL_PINN_S_I
     net = SIRNet(p["width"], p["depth"])
     log_beta = nn.Parameter(torch.tensor(np.log(p["beta0"])))
     log_gamma = nn.Parameter(torch.tensor(np.log(p["gamma0"])))
@@ -165,7 +165,7 @@ def train_pinn_incidence(cases, month_edges, log_N, log_I0, w_ode=None, epochs=C
         incidence = N_eff * -(S_edges[1:] - S_edges[:-1])
         l_data = ((incidence / scale - y_obs) ** 2).mean()
         l_ic = ((net(torch.zeros(1, 1)) - y0_scaled) ** 2).mean()
-        loss = l_data + w_ode * l_ode + 100 * l_ic  # I0 is tiny, so the IC must be enforced hard
+        loss = l_data + w_ode * l_ode + C.REAL_PINN_IC_WEIGHT * l_ic
         loss.backward()
         opt.step()
         if epoch == 1 or epoch % 100 == 0:

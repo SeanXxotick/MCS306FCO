@@ -44,13 +44,13 @@ This script matches the slide deck [`PINN_Dengue_Bulacan_Slides.pptx`](PINN_Deng
 
 **[SLIDE 9: The PINN on real data (fig7_bulacan_pinn.png)]**
 
-> And the PINN on real data? For 2010, its network curve fits the eight monthly points almost perfectly, with an R-squared of 0.9997. But when we put the beta and gamma it learned back into RK4, we get a different curve, with an R-squared of only 0.647. With only eight data points, the network can bend to fit the data without truly learning the parameters. The classical fit gives R-naught 2.71, with a bootstrap 95 percent interval of 1.29 to 4.24.
+> And the PINN on real data? For 2010, its network curve fits the eight monthly points almost perfectly, with an R-squared of 0.9997. But when we put the beta and gamma it learned back into RK4, we get a different curve, with an R-squared of only 0.647. With only eight data points, the network can bend to fit the data without truly learning the parameters. The classical fit gives R-naught 2.72, with a bootstrap 95 percent interval of 1.29 to 4.24.
 
 ## Part 5: Limitations and conclusion (Osyris Benedict P. Fajardo, ~1 min)
 
 **[SLIDE 10: What we learned]**
 
-> To wrap up: for a small model and sparse data, the classical method is faster, simpler and more reliable. PINNs work, but they need more data and careful tuning. We also found that R-naught is estimated more reliably than beta and gamma separately. Our study has limits. SIR ignores mosquitoes, so our infectious period of three to six weeks absorbs the mosquito's part of the cycle. Our data are monthly and end in 2010, and the 2006 fit hit a bound. For our thesis, we plan a mosquito–human model with weekly data and rainfall-driven transmission, where a neural network could really earn its place.
+> To wrap up: for a small model and sparse data, the classical method is faster, simpler and more reliable. PINNs work, but they need more data and careful tuning. We also found that the data pin down R-naught much better than the recovery rate gamma, whose interval covers the whole range we allowed. Our study has limits. SIR ignores mosquitoes, so our infectious period of three to six weeks absorbs the mosquito's part of the cycle. Our data are monthly and end in 2010, and the 2006 fit hit a bound. For our thesis, we plan a mosquito–human model with weekly data and rainfall-driven transmission, where a neural network could really earn its place.
 
 **[SLIDE 11: Thank you + repo link]**
 

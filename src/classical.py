@@ -53,7 +53,8 @@ def model_incidence(p, n_months, h=C.H_REAL):
     beta, gamma, log_N, log_I0 = p
     I0 = 10 ** log_I0
     edges = month_edges(n_months)
-    t, Y = rk4(beta, gamma, [1 - I0, I0, 0.0], edges[-1], h)
+    # integrate past the last edge: edges are multiples of 30.4 days, not of h
+    t, Y = rk4(beta, gamma, [1 - I0, I0, 0.0], np.ceil(edges[-1] / h) * h, h)
     S_edges = np.interp(edges, t, Y[:, 0])
     return 10 ** log_N * -np.diff(S_edges)
 

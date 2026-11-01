@@ -5,6 +5,7 @@
 Every number in the text is read from results/tables/*.csv, so the paper always matches
 the code's output. Edit AUTHORS below with the group members' names.
 """
+import inspect
 import sys
 from pathlib import Path
 
@@ -13,10 +14,12 @@ from docx import Document
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Inches, Pt, RGBColor
+from scipy.optimize import least_squares
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from src import config as C  # noqa: E402
+from src.classical import REAL_STARTS  # noqa: E402
 
 AUTHORS = ["Almoguez, Romar S.", "Dela Cruz, Sean Arkin C.", "Fajardo, Osyris Benedict P.",
            "Hornales, Jian Kyle C."]
@@ -49,6 +52,10 @@ lo_days, hi_days = C.INFECTIOUS_DAYS_RANGE
 at_bound = seasons[(seasons.infectious_days < lo_days * 1.01) | (seasons.infectious_days > hi_days * 0.99)]
 interior = seasons.drop(at_bound.index)
 p_cls, p_pinn = pinn10.iloc[0], pinn10.iloc[1]
+lsq_default = inspect.signature(least_squares).parameters["ftol"].default  # real-data fits use this
+max_synth_err = summ[["beta_err_pct", "gamma_err_pct"]].to_numpy().max()
+months_seen = pd.to_datetime(pd.read_csv(C.BULACAN_CSV).calendar_start_date)
+n_gap = len(pd.date_range(months_seen.min(), months_seen.max(), freq="MS").difference(months_seen))
 
 
 def f(x, d=2):
@@ -288,15 +295,16 @@ equation("Φ(θ) = ½ Σᵢ rᵢ(θ)²,   rᵢ(θ) = m(tᵢ; θ) − yᵢ", "5")
 body(
     "We use the trust-region reflective algorithm in SciPy's least_squares (Virtanen et al., 2020), a "
     "Gauss–Newton-type method that handles bound constraints (here β, γ > 0). Each evaluation of the "
-    "residual requires a full RK4 solution of (1). Iteration stops when the relative changes in Φ, in θ, "
-    "or the gradient norm fall below a tolerance."
+    "residual requires a full RK4 solution of (1), and the Jacobian is approximated by finite "
+    "differences, which costs one further solution per parameter at each iteration. Iteration stops "
+    "when the relative changes in Φ, in θ, or the gradient norm fall below a tolerance."
 )
 doc.add_heading("2.4 Neural Networks and Automatic Differentiation", 2)
 body(
     "A fully connected neural network with L hidden layers maps an input x to an output through "
     "compositions zₗ = σ(Wₗzₗ₋₁ + bₗ), where Wₗ and bₗ are trainable weights and biases and σ is a "
-    "nonlinear activation (here tanh). Such networks are universal approximators of continuous "
-    "functions. Training minimizes a loss function with gradient-based optimizers; we use Adam "
+    "nonlinear activation (here tanh). Such networks can approximate any continuous function on a "
+    "bounded domain arbitrarily well (Hornik et al., 1989). Training minimizes a loss function with gradient-based optimizers; we use Adam "
     "(Kingma & Ba, 2015), whose learning rate plays the role of a step size. Automatic differentiation, "
     "as implemented in PyTorch (Paszke et al., 2019), computes exact derivatives of the network output "
     "with respect to its input and parameters by applying the chain rule to the recorded computation, "
@@ -336,8 +344,10 @@ body(
     f"period 1/γ is further restricted to {lo_days}–{hi_days} days, i.e. γ ∈ [1/{hi_days}, 1/{lo_days}] "
     "per day. Without this constraint, the four-parameter fit to eight monthly points can collapse to a "
     "degenerate solution (γ at an arbitrary bound, R₀ ≈ 1 and a very large N_eff) that fits the data "
-    "equally well. The lower limit reflects the roughly one-week human infectious period; the upper "
-    "limit allows for the mosquito stage that a plain SIR model absorbs into γ."
+    "about as well. The lower limit reflects the human infectious period, during which the virus "
+    "circulates in the blood for about 2 to 10 days (Gubler, 1998); the upper limit allows for the "
+    "mosquito stage, including an extrinsic incubation period of 8 to 12 days (Gubler, 1998), that a "
+    "plain SIR model absorbs into γ."
 )
 doc.add_heading("Synthetic data", 3)
 body(
@@ -358,7 +368,8 @@ body(
 )
 equation("cases in month k = N_eff · [S(t_{k−1}) − S(t_k)]", "7")
 body(
-    "since every decrease in S is a new infection. The effective population N_eff absorbs the "
+    f"where t_k = {C.DAYS_PER_MONTH:g}k days is the end of month k, since every decrease in S is a new "
+    "infection. The effective population N_eff absorbs the "
     "reporting rate and the fraction of the population actually susceptible; it is estimated together "
     "with β, γ and I₀. This makes N_eff much smaller than the province's census population, which is "
     "expected when most infections are unreported or occur in a partly immune population."
@@ -366,8 +377,9 @@ body(
 doc.add_heading("3.2 Implementation and Code", 2)
 body(
     "All code is written in Python using NumPy, SciPy, pandas, Matplotlib and PyTorch, and is available "
-    f"in the project repository ({REPO_URL}). All settings (seeds, step sizes, tolerances, epochs) are "
-    "centralized in src/config.py, and run_all.py regenerates every table and figure in this paper."
+    f"in the project repository ({REPO_URL}). The settings (seeds, step sizes, tolerances, epochs, loss "
+    "weights) are in src/config.py, except the parameter bounds and starting points of the fits, which "
+    "are in src/classical.py; run_all.py regenerates every table and figure in this paper."
 )
 doc.add_heading("Algorithm 1: RK4 solver", 3)
 body("The RK4 step (2)–(3) is implemented directly (src/sir.py):")
@@ -387,13 +399,17 @@ body(
     "For a candidate θ = (β, γ), the residual vector is computed by solving (1) with RK4 and "
     "comparing the model's I(tᵢ) with the data; least_squares then updates θ (src/classical.py). For the "
     "real data, θ = (β, γ, log₁₀N_eff, log₁₀I₀) and the residuals follow (7). Because this "
-    "four-parameter problem is non-convex, the fit is started from six initial guesses and the best "
-    "solution is kept."
+    f"four-parameter problem is non-convex, the fit is started from {len(REAL_STARTS)} initial guesses and "
+    "the best solution is kept. When h does not divide the one-day spacing of the synthetic "
+    "observations (h = 2 and 5 days in Experiment 1b), the model values at the observation times are "
+    "linearly interpolated between RK4 points. The synthetic fits use the tight tolerances listed in "
+    f"the settings table below; the real-data fits and the bootstrap refits use SciPy's default of {lsq_default:g}."
 )
 code('''
 def residuals(p):
     t, Y = rk4(p[0], p[1], y0, t_end, h)
-    return (Y[::stride, 1] - I_obs) / I_obs.max()
+    I_model = Y[::stride, 1] if stride else np.interp(t_obs, t, Y[:, 1])
+    return (I_model - I_obs) / I_obs.max()
 
 res = least_squares(residuals, p0, bounds=([1e-4, 1e-4], [5, 5]),
                     ftol=1e-10, xtol=1e-10, gtol=1e-10)
@@ -401,8 +417,8 @@ res = least_squares(residuals, p0, bounds=([1e-4, 1e-4], [5, 5]),
 doc.add_heading("Algorithm 3: PINN", 3)
 body(
     f"The network maps rescaled time τ = t/T ∈ [0, 1] to (S, I/s_I, R) through {C.PINN['depth']} hidden "
-    f"layers of {C.PINN['width']} tanh units and a sigmoid output, where s_I is the maximum observed I, so "
-    "all outputs are of order one. The ODE residuals are evaluated at "
+    f"layers of {C.PINN['width']} tanh units and a sigmoid output, where s_I is the maximum observed I "
+    "(synthetic data), so all outputs are of order one. The ODE residuals are evaluated at "
     f"{C.PINN['n_col']} equally spaced collocation points using torch.autograd.grad, with the chain rule "
     "d/dτ = T·d/dt. β and γ are stored as log-values and optimized by Adam together with the weights "
     "(src/pinn.py):"
@@ -416,26 +432,40 @@ r_R = d_dtau(R) - T * (gamma * I)
 loss = l_data + w_ode * (r_S**2 + r_I**2 + r_R**2).mean() + l_ic
 loss.backward();  opt.step()
 ''')
+body(
+    "For the real data the PINN is trained on monthly case counts instead (train_pinn_incidence): the "
+    "data loss compares N_eff·[S(t_{k−1}) − S(t_k)] at the month ends with the reported cases, both "
+    "divided by the largest monthly count; N_eff and I₀ are fixed at the classical estimates; s_I is "
+    f"fixed at {C.REAL_PINN_S_I:g}; the initial-condition term is weighted by {C.REAL_PINN_IC_WEIGHT:g} "
+    f"because I₀ is very small; and training runs for a fixed {C.REAL_PINN_EPOCHS:,} epochs without the "
+    "stopping rule."
+)
 doc.add_heading("Step size, iteration count and tolerance", 3)
 settings = pd.DataFrame([
     ["RK4 (data generation)", "step size h", f"{C.H_DATA} day"],
     ["RK4 (convergence study)", "step sizes h", ", ".join(f"{h:g}" for h in C.H_LIST) + f" (reference h = {C.H_REF:g})"],
     ["RK4 (inside synthetic fit)", "step size h", f"{C.H_FIT} day (Exp. 1b varies {', '.join(f'{h:g}' for h in C.H_FIT_LIST)})"],
     ["RK4 (real-data model)", "step size h", f"{C.H_REAL} day"],
-    ["Least squares", "tolerances ftol, xtol, gtol", f"{C.LSQ_TOL:g}"],
+    ["Least squares (synthetic)", "tolerances ftol, xtol, gtol", f"{C.LSQ_TOL:g}"],
+    ["Least squares (real data)", "tolerances ftol, xtol, gtol", f"{lsq_default:g} (SciPy default)"],
     ["PINN", "Adam learning rate", f"{C.PINN['lr']:g}"],
     ["PINN", "maximum epochs", f"{C.PINN['max_epochs']:,}"],
     ["PINN", "stopping rule", f"relative change of β and γ over {C.PINN['check_every']} epochs < {C.PINN['tol']:g}"],
     ["PINN", "physics-loss weight w_ode", f"{C.PINN['w_ode']:g} (Exp. 3 varies {', '.join(f'{w:g}' for w in C.W_ODE_SWEEP)})"],
     ["PINN (real data)", "epochs (fixed)", f"{C.REAL_PINN_EPOCHS:,}"],
+    ["PINN (real data)", "initial-condition weight; s_I",
+     f"{C.REAL_PINN_IC_WEIGHT:g}; {C.REAL_PINN_S_I:g}"],
     ["Bootstrap", "replicates", f"{C.BOOTSTRAP_B}"],
 ], columns=["Component", "Setting", "Value"])
-table(settings, ["Component", "Setting", "Value"], "Numerical settings used in all experiments")
+table(settings, ["Component", "Setting", "Value"], "Numerical settings")
 body(
-    "Errors are reported as relative parameter errors |θ̂ − θ|/θ × 100%, and as the root-mean-square "
+    "The global error of RK4 is |S_h(T) − S_ref(T)| + |I_h(T) − I_ref(T)| at "
+    f"T = {C.T_DAYS} days, where the reference solution uses h = {C.H_REF:g}. Estimation errors are "
+    "reported as relative parameter errors |θ̂ − θ|/θ × 100%, and as the root-mean-square "
     "error (trajectory RMSE) between the true I(t) and an RK4 re-simulation with the estimated "
     "parameters. Runtimes were measured on a laptop CPU (Intel Core i5-13420H) with PyTorch restricted to "
-    "one thread; environment details are recorded in results/run_log.txt."
+    "one thread, running the four experiments as parallel processes; environment details are recorded "
+    "in results/run_log.txt."
 )
 
 # ------------------------------------------------------------------ 3.3 RESULTS
@@ -452,7 +482,7 @@ t1 = table(c1[["h", "steps", "global_error", "observed_order", "max_mass_drift"]
 fg1 = figure("fig1_rk4_convergence.png",
              "(a) Log–log plot of RK4 global error versus step size with a slope-4 reference line. "
              "(b) Relative error of the classical estimates on noise-free data as a function of the RK4 "
-             "step size used inside the fit.")
+             "step size used inside the fit; errors below 10⁻⁸ % are drawn at 10⁻⁸ %.")
 body(
     f"Table {t1} and Figure {fg1}a show that halving h reduces the error by a factor of about 16; the "
     f"observed order ranges from {f(orders.min(), 3)} to {f(orders.max(), 3)}, in agreement with the "
@@ -460,7 +490,9 @@ body(
     f"Figure {fg1}b shows that the solver step used inside the fit controls a systematic bias: with "
     f"h = {fitstep.h_fit.iloc[0]:g} days the estimates of β and γ are off by "
     f"{pct(fitstep.beta_rel_err_pct.iloc[0])} and {pct(fitstep.gamma_rel_err_pct.iloc[0])}, while with "
-    f"h = 1 day the error drops to {pct(fitstep.beta_rel_err_pct.iloc[2])}. With h = {C.H_DATA}, the same "
+    f"h = {fitstep.h_fit.iloc[2]:g} day the error of β drops to {pct(fitstep.beta_rel_err_pct.iloc[2])}. "
+    "For h = 2 and 5 days the model is also linearly interpolated between RK4 points (Section 3.2), so "
+    f"part of this bias comes from the interpolation rather than from RK4 itself. With h = {C.H_DATA}, the same "
     "step used to generate the data, the parameters are recovered to machine precision; this is the "
     "so-called inverse crime, which is why noise is added in the remaining experiments."
 )
@@ -476,13 +508,15 @@ t2 = table(s[["method", "noise", "beta_cell", "gamma_cell", "traj_rmse", "iterat
            fmts={"noise": lambda v: f"{v:.0%}", "traj_rmse": lambda v: f"{v:.2e}",
                  "iterations": lambda v: f"{v:,.0f}", "seconds": lambda v: f"{v:.2f}"},
            note=(f"Classical values are means over {len(C.NOISE_SEEDS)} noise draws (one draw at 0% "
-                 "noise); iterations are function evaluations (each a full RK4 solve). PINN values are "
+                 "noise); iterations are SciPy's function evaluations, each a full RK4 solve (the "
+                 "finite-difference Jacobian adds two more solves per iteration). PINN values are "
                  "from one training run (seed 0); iterations are epochs until the stopping rule."))
 fg2 = figure("fig2_fits.png",
              "Observed infected fraction (points) with the classical fit (solid) and PINN prediction "
              "(dashed) at 0%, 5% and 10% noise.")
 fg3 = figure("fig3_pinn_training.png",
-             "PINN training at 5% noise. (a) Data, ODE-residual and total loss per epoch. (b) Estimates "
+             "PINN training at 5% noise. (a) Data loss, ODE-residual loss (before weighting) and total "
+             "loss, recorded every 100 epochs. (b) Estimates "
              "of β and γ during training; dotted lines mark the true values.")
 body(
     f"Both methods recover the parameters accurately (Table {t2}, Figure {fg2}). At 10% noise the PINN's "
@@ -512,19 +546,21 @@ body(
     f"Figure {fg4}). The most accurate weight was w_ode = {best_w.w_ode:g} (errors "
     f"{pct(best_w.beta_err_pct)} and {pct(best_w.gamma_err_pct)}), while w_ode = {worst_w.w_ode:g} gave "
     f"errors of {pct(worst_w.beta_err_pct)} and {pct(worst_w.gamma_err_pct)}. "
-    + (f"With the largest weight (w_ode = {w_max.w_ode:g}) the estimate of β stalled on a plateau far "
-       "from the true value for most of training before moving, and the run reached the "
+    + (f"With the largest weight (w_ode = {w_max.w_ode:g}) the estimate of β stayed far from the true "
+       f"value for more than half of training (Figure {fg4}b) before moving, and the run reached the "
        f"{C.PINN['max_epochs']:,}-epoch cap without satisfying the stopping rule. "
        if not w_max.converged_by_tol else "")
-    + f"With the smallest weight (w_ode = {w_min.w_ode:g}) training is fast, but the physics constraint "
-    "is weak and β is less accurate. The classical method has no corresponding tuning parameter."
+    + f"With the smallest weight (w_ode = {w_min.w_ode:g}) the β error rose to "
+    f"{pct(w_min.beta_err_pct)} (γ error {pct(w_min.gamma_err_pct)}) after {int(w_min.epochs):,} epochs. "
+    "The classical method has no corresponding tuning parameter."
 )
 doc.add_heading("Experiment 4: Dengue seasons in Bulacan", 3)
 fg5 = figure("fig5_bulacan_overview.png",
-             "Monthly reported dengue cases in Bulacan, 1994–2010 (OpenDengue V1.3).")
+             "Monthly reported dengue cases in Bulacan, 1994–2010 (OpenDengue V1.3). The line bridges "
+             f"the {n_gap} months with no reported count.")
 t4 = table(seasons[["season", "total_cases", "peak_cases", "beta", "gamma", "R0", "infectious_days",
                     "N_eff", "R2"]],
-           ["Season", "Cases (May–Dec)", "Peak month", "β̂", "γ̂", "R₀", "1/γ̂ (days)", "N_eff", "R²"],
+           ["Season", "Cases (May–Dec)", "Peak monthly cases", "β̂", "γ̂", "R₀", "1/γ̂ (days)", "N_eff", "R²"],
            "Classical SIR fits to Bulacan outbreak seasons (May–December)",
            note=(f"1/γ̂ was constrained to {lo_days}–{hi_days} days; "
                  + (f"the {', '.join(str(s) for s in at_bound.season)} estimate lies on the boundary."
@@ -573,10 +609,10 @@ body(
 # ------------------------------------------------------------------ 3.4 DISCUSSION
 doc.add_heading("3.4 Analysis and Discussion", 2)
 rich([("Accuracy. ", "b"),
-      ("On synthetic data both methods achieve parameter errors of about one percent or less. The "
-       "classical errors, averaged over several noise draws, grow with the noise level as expected; the "
-       "PINN errors come from a single training run per noise level and fluctuate rather than growing "
-       "smoothly, so a lower PINN error in one run should not be read as a systematic advantage. Since "
+      (f"On synthetic data both methods achieve parameter errors of at most {pct(max_synth_err)} (Table "
+       f"{t2}). The classical errors, averaged over several noise draws, grow with the noise level as "
+       "expected; the PINN errors come from a single training run per noise level, so a lower PINN "
+       "error in one run should not be read as a systematic advantage. Since "
        "both methods fit the same model to the same data, neither can do much better than the "
        "information in the noisy observations allows. The classical method's accuracy is "
        "limited by the RK4 step used inside the fit (Experiment 1b), which is negligible for h ≤ 1 day "
@@ -600,9 +636,10 @@ rich([("Real data. ", "b"),
       ("The classical SIR model captures the timing and size of Bulacan's outbreaks, but the implied "
        f"infectious periods (1/γ ≈ {interior.infectious_days.min():.0f}–"
        f"{interior.infectious_days.max():.0f} days for the seasons whose estimate lies inside the "
-       "constraint) are longer than the roughly one-week infectious period of a human dengue case. This is a "
-       "symptom of model simplification: SIR has no mosquito compartment, so the extrinsic incubation "
-       "period in the mosquito and the mosquito lifespan are absorbed into γ. β and γ should therefore "
+       "constraint) are longer than the 2 to 10 days during which the virus circulates in a patient's "
+       "blood (Gubler, 1998). This is a symptom of model simplification: SIR has no mosquito "
+       "compartment, so the extrinsic incubation period in the mosquito (8 to 12 days) and the mosquito "
+       "lifespan are absorbed into γ. β and γ should therefore "
        "be read as effective seasonal rates rather than biological constants. "
        + (f"The {', '.join(str(s) for s in at_bound.season)} season"
           f"{'s' if len(at_bound) > 1 else ''} ended at the boundary of the constraint, which signals "
@@ -663,6 +700,10 @@ refs = [
     "https://doi.org/10.1038/s41597-024-03120-7",
     "Esteva, L., & Vargas, C. (1998). Analysis of a dengue disease transmission model. Mathematical "
     "Biosciences, 150(2), 131–151. https://doi.org/10.1016/S0025-5564(98)10003-2",
+    "Gubler, D. J. (1998). Dengue and dengue hemorrhagic fever. Clinical Microbiology Reviews, 11(3), "
+    "480–496. https://doi.org/10.1128/CMR.11.3.480",
+    "Hornik, K., Stinchcombe, M., & White, H. (1989). Multilayer feedforward networks are universal "
+    "approximators. Neural Networks, 2(5), 359–366. https://doi.org/10.1016/0893-6080(89)90020-8",
     "Karniadakis, G. E., Kevrekidis, I. G., Lu, L., Perdikaris, P., Wang, S., & Yang, L. (2021). "
     "Physics-informed machine learning. Nature Reviews Physics, 3(6), 422–440. "
     "https://doi.org/10.1038/s42254-021-00314-5",

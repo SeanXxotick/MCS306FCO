@@ -10,3 +10,6 @@ Experiment 2 (Synthetic recovery: PINN vs classical): 190.5 s
 Experiment 3 (PINN physics-loss weight sweep): 294.2 s
 Experiment 4 (Real data: Bulacan outbreak seasons): 133.3 s
 Full console output: results/logs/
+
+Experiment 4 was rerun on 2026-11-01 after a fix to the real-data time grid
+(the last month now ends at day 243.2 instead of 243.0): 290.2 s
