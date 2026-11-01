@@ -10,6 +10,7 @@ import time
 
 import numpy as np
 import pandas as pd
+from matplotlib.ticker import NullFormatter
 
 from src import config as C
 from src.classical import fit_synthetic
@@ -61,6 +62,10 @@ def main():
     ax.set_ylabel("parameter error (%)")
     ax.set_title("(b) Solver step size limits fit accuracy")
     ax.legend()
+    # x ticks only at the step sizes we tested (the default log-axis labels overlap)
+    for ax, ticks in zip(axes, [h, fitstep.h_fit.to_numpy()]):
+        ax.set_xticks(ticks, [f"{v:g}" for v in ticks])
+        ax.xaxis.set_minor_formatter(NullFormatter())
     save(fig, "fig1_rk4_convergence.png")
 
     print("Experiment 1: RK4 convergence")
